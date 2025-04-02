@@ -1,0 +1,36 @@
+#!/usr/bin/env python3
+
+import os, argparse, subprocess
+
+# parse arguments
+parser = argparse.ArgumentParser()
+parser.add_argument("fasm", metavar="input.s", help="the MIPS assembly file (ASCII)")
+args = parser.parse_args()
+
+fasm = args.fasm
+fhex = os.path.splitext(args.fasm)[0] + ".x"
+
+# run SPIM (the actual MIPS assembler)
+# SPIM = "/afs/ece/class/ece447/bin/spim447"
+SPIM = "/Users/ak/manipal/Architecture/CMU-Labs/Lab1/spimsimulator-code-r764/spim/spim"
+cmd = [SPIM, "-notrap", "-dump", fasm]
+subprocess.call(cmd)
+
+# SPIM outputs many files; but we are interested in only one
+cmd = ["mv", "text.asm", fhex]
+subprocess.call(cmd)
+
+# remove unnecessary two lines from the file
+lines = open(fhex).readlines()
+lines = list(map(lambda x: x.lstrip(), lines))
+lines = lines[2:]
+lines = [line.split()[1] for line in lines]
+print(lines)
+data = str.join('\n', lines)
+open(fhex, 'w').write(data)
+
+# remove all other files
+#cmd = ["rm", fhex + ".*.dat"]
+#cmd = str.join(' ', cmd)
+#subprocess.call(cmd, shell=True)  # we need a shell to expand the wildcard
+
